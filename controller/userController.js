@@ -89,3 +89,28 @@ export const deleteUser = async (req, res)=>{
     }
 }
 
+export const searchStudents = async (req, res) => {
+    try {
+        const { query } = req.query;
+        
+        // Create a search query that matches either name or studentid
+        const searchQuery = {
+            $or: [
+                // Search by name (case-insensitive)
+                { name: { $regex: query, $options: 'i' } },
+                // Search by exact student ID if the query is a number
+                ...(isNaN(query) ? [] : [{ studentid: parseInt(query) }])
+            ]
+        };
+
+        const students = await User.find(searchQuery);
+        
+        if (!students || students.length === 0) {
+            return res.status(404).json({ message: "No students found matching your search" });
+        }
+        
+        res.status(200).json(students);
+    } catch (error) {
+        res.status(500).json({ errorMessage: error.message });
+    }
+};
