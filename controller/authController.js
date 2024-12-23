@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
+    console.log('Register request received:', req.body);
     try {
         const { username, email, password } = req.body;
 
@@ -48,18 +49,25 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
+    console.log('Login request received:', { 
+        email: req.body.email,
+        headers: req.headers
+    });
+    
     try {
         const { email, password } = req.body;
 
         // Check if user exists
         const user = await UserAuth.findOne({ email });
         if (!user) {
+            console.log('User not found:', email);
             return res.status(400).json({ message: "Invalid credentials" });
         }
 
         // Check password
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
+            console.log('Invalid password for user:', email);
             return res.status(400).json({ message: "Invalid credentials" });
         }
 
@@ -70,6 +78,7 @@ export const login = async (req, res) => {
             { expiresIn: "1d" }
         );
 
+        console.log('Login successful for user:', email);
         res.json({
             token,
             user: {
@@ -81,6 +90,7 @@ export const login = async (req, res) => {
         });
 
     } catch (error) {
+        console.error('Login error:', error);
         res.status(500).json({ message: error.message });
     }
 };
