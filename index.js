@@ -7,19 +7,25 @@ import userRoute from "./routes/userRoute.js"
 import authRoute from "./routes/authRoute.js"
 import { authMiddleware } from "./middleware/auth.js"
 
+// Load environment variables first
+dotenv.config();
+
 const app = express();
 app.use(cors({
     origin: process.env.CLIENT_URL || 'http://localhost:3000',
     credentials: true
 }));
 app.use(bodyParser.json());
-dotenv.config();
 
 const PORT = process.env.PORT || 8080;
 const MONGOURL = process.env.MONGO_URL;
 
+// Connect to MongoDB
 mongoose
-    .connect(MONGOURL)
+    .connect(MONGOURL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    })
     .then(() => {
         console.log("DB connected successfully")
         app.listen(PORT, () => {
