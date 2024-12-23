@@ -19,6 +19,11 @@ app.use(cors({
 }));
 app.use(bodyParser.json());
 
+// Add test endpoint
+app.get('/api/test', (req, res) => {
+    res.json({ message: 'Server is running!' });
+});
+
 const PORT = process.env.PORT || 8080;
 const MONGOURL = process.env.MONGO_URL;
 
@@ -41,3 +46,15 @@ app.use("/api/auth", authRoute);
 
 // Protected routes
 app.use("/api", authMiddleware, userRoute);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: 'Something went wrong!' });
+});
+
+// 404 handler
+app.use((req, res) => {
+    console.log('404 Not Found:', req.method, req.url);
+    res.status(404).json({ message: 'Route not found' });
+});
